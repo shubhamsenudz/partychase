@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 async function api(path, opts={}) {
   const token = localStorage.getItem("token");
-  const res = await fetch("/api"+path, { ...opts, headers: { "Content-Type":"application/json", ...(token?{Authorization:"Bearer "+token}:{}), ...(opts.headers||{}) } });
+  const res = await fetch((import.meta.env.VITE_API_URL||"")+"/api"+path, { ...opts, headers: { "Content-Type":"application/json", ...(token?{Authorization:"Bearer "+token}:{}), ...(opts.headers||{}) } });
   if(!res.ok) throw new Error(await res.text());
   const text = await res.text();
   if(!text) return null;
@@ -22,8 +22,8 @@ function PartyPage(){
         <label>creditDays<input value={form.creditDays ?? ""} onChange={ev => setForm({...form, creditDays: ev.target.value})} /></label>
       <button type="submit">Add</button>
     </form>
-    <table><thead><tr><th>name</th><th>phone</th><th>city</th><th>creditDays</th><th></th></tr></thead>
-    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.name ?? "")}</td><td>{String(row.phone ?? "")}</td><td>{String(row.city ?? "")}</td><td>{String(row.creditDays ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table>
+    <div className="table-wrap"><table><thead><tr><th>name</th><th>phone</th><th>city</th><th>creditDays</th><th></th></tr></thead>
+    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.name ?? "")}</td><td>{String(row.phone ?? "")}</td><td>{String(row.city ?? "")}</td><td>{String(row.creditDays ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </div>);
 }
 
@@ -43,8 +43,8 @@ function InvoicePage(){
         <label>dueOn<input value={form.dueOn ?? ""} onChange={ev => setForm({...form, dueOn: ev.target.value})} /></label>
       <button type="submit">Add</button>
     </form>
-    <table><thead><tr><th>partyId</th><th>invoiceNo</th><th>amount</th><th>outstanding</th><th>dueOn</th><th></th></tr></thead>
-    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.partyId ?? "")}</td><td>{String(row.invoiceNo ?? "")}</td><td>{String(row.amount ?? "")}</td><td>{String(row.outstanding ?? "")}</td><td>{String(row.dueOn ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table>
+    <div className="table-wrap"><table><thead><tr><th>partyId</th><th>invoiceNo</th><th>amount</th><th>outstanding</th><th>dueOn</th><th></th></tr></thead>
+    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.partyId ?? "")}</td><td>{String(row.invoiceNo ?? "")}</td><td>{String(row.amount ?? "")}</td><td>{String(row.outstanding ?? "")}</td><td>{String(row.dueOn ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </div>);
 }
 
@@ -63,8 +63,8 @@ function PromisePage(){
         <label>status<input value={form.status ?? ""} onChange={ev => setForm({...form, status: ev.target.value})} /></label>
       <button type="submit">Add</button>
     </form>
-    <table><thead><tr><th>invoiceId</th><th>promiseOn</th><th>note</th><th>status</th><th></th></tr></thead>
-    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.invoiceId ?? "")}</td><td>{String(row.promiseOn ?? "")}</td><td>{String(row.note ?? "")}</td><td>{String(row.status ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table>
+    <div className="table-wrap"><table><thead><tr><th>invoiceId</th><th>promiseOn</th><th>note</th><th>status</th><th></th></tr></thead>
+    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.invoiceId ?? "")}</td><td>{String(row.promiseOn ?? "")}</td><td>{String(row.note ?? "")}</td><td>{String(row.status ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </div>);
 }
 
@@ -82,8 +82,8 @@ function CollectionPage(){
         <label>mode<input value={form.mode ?? ""} onChange={ev => setForm({...form, mode: ev.target.value})} /></label>
       <button type="submit">Add</button>
     </form>
-    <table><thead><tr><th>invoiceId</th><th>amount</th><th>mode</th><th></th></tr></thead>
-    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.invoiceId ?? "")}</td><td>{String(row.amount ?? "")}</td><td>{String(row.mode ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table>
+    <div className="table-wrap"><table><thead><tr><th>invoiceId</th><th>amount</th><th>mode</th><th></th></tr></thead>
+    <tbody>{rows.map(row=><tr key={row.id}><td>{String(row.invoiceId ?? "")}</td><td>{String(row.amount ?? "")}</td><td>{String(row.mode ?? "")}</td><td><button className="link" onClick={()=>remove(row.id)}>Delete</button></td></tr>)}</tbody></table></div>
   </div>);
 }
 function Dashboard(){
@@ -100,6 +100,7 @@ function Dashboard(){
 }
 export default function App(){
   const [token,setToken]=useState(localStorage.getItem("token"));
+  const [menu,setMenu]=useState(false);
   const [page,setPage]=useState("dashboard");
   const [mode,setMode]=useState("login");
   const [form,setForm]=useState({tenantName:"",city:"Mumbai",fullName:"",email:"",password:""});
@@ -136,9 +137,10 @@ export default function App(){
   if(page==="promises") body = <PromisePage />;
   if(page==="collections") body = <CollectionPage />;
   return (<div>
-    <div className="top"><div className="brand">PartyChase</div><button onClick={()=>{localStorage.removeItem("token"); setToken(null);}}>Log out</button></div>
+    <div className="top"><button type="button" className="burger" onClick={()=>setMenu(v=>!v)}>Menu</button><div className="brand">PartyChase</div><button onClick={()=>{localStorage.removeItem("token"); setToken(null);}}>Log out</button></div>
     <div className="layout">
-      <nav>
+      {menu && <button className="scrim" onClick={()=>setMenu(false)} />}
+      <nav className={"side"+(menu?" open":"")} onClick={()=>setMenu(false)}>
           <button className={page==="dashboard"?"active":""} onClick={()=>setPage("dashboard")}>Home</button>
           <button className={page==="parties"?"active":""} onClick={()=>setPage("parties")}>Partys</button>
           <button className={page==="invoices"?"active":""} onClick={()=>setPage("invoices")}>Invoices</button>
@@ -146,6 +148,13 @@ export default function App(){
           <button className={page==="collections"?"active":""} onClick={()=>setPage("collections")}>Collections</button>
       </nav>
       <main>{body}</main>
+      <nav className="tabs">
+          <button className={page==="dashboard"?"active":""} onClick={()=>setPage("dashboard")}>Home</button>
+          <button className={page==="parties"?"active":""} onClick={()=>setPage("parties")}>Partys</button>
+          <button className={page==="invoices"?"active":""} onClick={()=>setPage("invoices")}>Invoices</button>
+          <button className={page==="promises"?"active":""} onClick={()=>setPage("promises")}>Promises</button>
+          <button className={page==="collections"?"active":""} onClick={()=>setPage("collections")}>Collections</button>
+      </nav>
     </div>
   </div>);
 }
