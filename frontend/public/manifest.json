@@ -3,8 +3,8 @@
   "short_name": "PartyChase",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#9a3412",
+  "background_color": "#FBF4EF",
+  "theme_color": "#9C2F12",
   "icons": [
     {
       "src": "/icon.svg",
