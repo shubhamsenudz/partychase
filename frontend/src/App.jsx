@@ -111,25 +111,29 @@ function CollectionsPage(){
   </section>);
 }
 function Dashboard(){
-  const [data,setData]=useState(null);
-  const [counts,setCounts]=useState([]);
-  useEffect(()=>{
-    api("/dashboard").then(setData).catch(()=>{});
-    Promise.all([api("/parties"),api("/invoices"),api("/promises"),api("/collections")]).then(sets => setCounts(sets.map(x => (x||[]).length))).catch(()=>{});
-  },[]);
+  const [w,setW]=useState(null);
+  useEffect(()=>{ api("/work").then(setW).catch(()=>{}); },[]);
+  const a=w?.ageing||{};
   return (<div>
     <div className="hero-panel">
-      <div className="kicker">For distributors</div>
-      <h1>PartyChase</h1>
-      <p>{data?.tag || "Chase outstanding when Tally sits at the CA. Promise Friday. Collect."}</p>
+      <div className="kicker">Today</div>
+      <h1>Who owes you money</h1>
+      <p>Ageing from Tally-style bills. Copy the chase message. Collect on the Collections page.</p>
     </div>
     <div className="hero">
-      <div className="stat"><span>Workspace</span><b>{data?.tenant || "—"}</b></div>
-      <div className="stat"><span>Parties</span><b>{counts[0] ?? 0}</b></div>
-      <div className="stat"><span>Outstanding</span><b>{counts[1] ?? 0}</b></div>
-      <div className="stat"><span>Promises</span><b>{counts[2] ?? 0}</b></div>
-      <div className="stat"><span>Collections</span><b>{counts[3] ?? 0}</b></div>
+      <div className="stat"><span>Total due</span><b>Rs {w?.totalOutstanding ?? 0}</b></div>
+      <div className="stat"><span>0-30 days</span><b>Rs {a.d0_30 ?? 0}</b></div>
+      <div className="stat"><span>31-60</span><b>Rs {a.d31_60 ?? 0}</b></div>
+      <div className="stat"><span>90+</span><b>Rs {a.d90plus ?? 0}</b></div>
     </div>
+    <section className="card">
+      <h2>Chase list</h2>
+      {(w?.chase||[]).length===0 ? <div className="empty">Add invoices with outstanding amount and due date.</div> : (
+        <div className="table-wrap"><table><thead><tr><th>Party</th><th>Bill</th><th>Due</th><th>Amount</th><th></th></tr></thead>
+        <tbody>{(w?.chase||[]).map(r=><tr key={r.id}><td>{r.party}</td><td>{r.invoiceNo}</td><td>{r.dueOn}</td><td>Rs {r.outstanding}</td>
+          <td><button className="ghost-ink" onClick={()=>navigator.clipboard.writeText(r.reminder)}>Copy chase</button></td></tr>)}</tbody></table></div>
+      )}
+    </section>
   </div>);
 }
 export default function App(){
